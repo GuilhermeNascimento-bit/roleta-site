@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartaz de Mesa Di Lione</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;0,6..96,700;1,6..96,600&family=Work+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --bg:#131010; --surface:#1d1815; --text:#f4ecdd; --text-muted:#b6a68d;
+    --accent:#cda454; --accent-strong:#e6c374; --line:#3a332c; --shadow:rgba(0,0,0,.5);
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#f4ecda; --surface:#fffcf4; --text:#221a12; --text-muted:#6b5d48;
+      --accent:#a8792a; --accent-strong:#8a621f; --line:#e2d5b5; --shadow:rgba(60,40,10,.16);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#f4ecda; --surface:#fffcf4; --text:#221a12; --text-muted:#6b5d48;
+    --accent:#a8792a; --accent-strong:#8a621f; --line:#e2d5b5; --shadow:rgba(60,40,10,.16);
+  }
+  *{ box-sizing:border-box; }
+  html{ color-scheme:dark light; }
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:'Work Sans', sans-serif; }
+  h1,h2{ font-family:'Bodoni Moda', Georgia, serif; text-wrap:balance; margin:0; }
+
+  .wrap{ max-width:640px; margin:0 auto; padding:28px 20px 48px; display:flex; flex-direction:column; gap:18px; }
+  .toolbar{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    flex-wrap:wrap;
+  }
+  .toolbar p{ color:var(--text-muted); font-size:13.5px; margin:0; max-width:38ch; }
+  .btn{
+    font-family:'Work Sans', sans-serif; font-weight:600; font-size:14px;
+    padding:11px 18px; border:1px solid var(--accent); background:var(--accent);
+    color:#221a12; cursor:pointer; letter-spacing:.02em;
+  }
+  .btn:hover{ background:var(--accent-strong); border-color:var(--accent-strong); }
+  .hint{
+    font-size:12.5px; color:var(--text-muted); font-style:italic;
+  }
+
+  /* the physical card — deliberately fixed light print colors, independent of theme */
+  .sheet{
+    background:#fffaf0;
+    border:1px solid #e2d5b5;
+    box-shadow:0 18px 40px -18px var(--shadow);
+    width:100%;
+    aspect-ratio:105/148; /* A6 portrait ratio, two panels stacked = A5 sheet */
+    display:flex;
+    flex-direction:column;
+    color:#221a12;
+    overflow:hidden;
+  }
+  .panel{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    padding:6% 8%;
+    text-align:center;
+    position:relative;
+  }
+  .panel.flip{ transform:rotate(180deg); }
+  .fold-line{
+    border-top:1px dashed #c9b98c;
+    position:relative;
+    flex:none;
+  }
+  .fold-label{
+    position:absolute; left:50%; top:-8px; transform:translateX(-50%);
+    background:#fffaf0; color:#a8792a; font-family:'Space Mono', monospace;
+    font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:0 8px;
+  }
+  .p-eyebrow{
+    font-family:'Space Mono', monospace; font-size:10px; letter-spacing:.16em;
+    text-transform:uppercase; color:#a8792a;
+  }
+  .p-title{
+    font-size:clamp(20px,6vw,26px); font-weight:700; font-style:italic; line-height:1.15;
+  }
+  .p-sub{ font-size:12px; color:#6b5d48; max-width:26ch; line-height:1.45; }
+  .qr-box{
+    background:#fff; padding:10px; border:1px solid #e2d5b5; line-height:0;
+  }
+  .p-steps{
+    display:flex; flex-direction:column; gap:3px; font-size:11px; color:#4a3f2c;
+    font-family:'Space Mono', monospace;
+  }
+  .p-url{ font-size:9.5px; color:#8a7350; word-break:break-all; font-family:'Space Mono', monospace; }
+  .p-footer{ font-size:9px; color:#8a7350; margin-top:2px; }
+
+  @media print{
+    body{ background:#fff; }
+    .toolbar, .hint{ display:none; }
+    .wrap{ padding:0; max-width:none; }
+    .sheet{ box-shadow:none; border:none; aspect-ratio:auto; height:100vh; }
+    @page{ margin:10mm; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="toolbar no-print">
+    <p>Cartaz de mesa em formato tenda: dobre na linha pontilhada e cole as bordas para ficar em pé, visível dos dois lados da mesa.</p>
+    <button class="btn" id="printBtn" type="button">Imprimir</button>
+  </div>
+
+  <div class="sheet">
+    <div class="panel" id="panelTop">
+      <div class="p-eyebrow">Di Lione &middot; Cucina &amp; Pizzeria</div>
+      <h2 class="p-title">Opine eAvalie e&nbsp;Ganhenbsp;Ganhe</h2>
+      <p class="p-sub">Escaneie, responda nossa pesquisa rápida e gire a pizza para ganhar uma cortesia no seu próximo pedido.</p>
+      <div class="qr-box" id="qrTop"></div>
+      <div class="p-steps">
+        <span>01 · Escaneie o código</span>
+        <span>02 · Responda a pesquisa</span>
+        <span>03 · Gire e ganhe seu brinde</span>
+      </div>
+    </div>
+
+    <div class="fold-line"><span class="fold-label">Dobre aqui</span></div>
+
+    <div class="panel flip" id="panelBottom">
+      <div class="p-eyebrow">Di Lione &middot; Cucina &amp; Pizzeria</div>
+      <h2 class="p-title">Opine eAvalie e&nbsp;Ganhenbsp;Ganhe</h2>
+      <p class="p-sub">Escaneie, responda nossa pesquisa rápida e gire a pizza para ganhar uma cortesia no seu próximo pedido.</p>
+      <div class="qr-box" id="qrBottom"></div>
+      <div class="p-steps">
+        <span>01 · Escaneie o código</span>
+        <span>02 · Responda a pesquisa</span>
+        <span>03 · Gire e ganhe seu brinde</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint">Dica: imprima em papel um pouco mais rígido (couché/cartão) para o cartaz ficar firme em pé na mesa.</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  // TODO: troque pela URL final do index.html depois de hospedar no Netlify
+  var TARGET_URL = "https://luxury-sunshine-0a9c75.netlify.app";
+
+  function makeQR(elId){
+    new QRCode(document.getElementById(elId), {
+      text: TARGET_URL,
+      width: 132,
+      height: 132,
+      colorDark: "#221a12",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
+  makeQR("qrTop");
+  makeQR("qrBottom");
+
+  document.getElementById("printBtn").addEventListener("click", function(){
+    window.print();
+  });
+})();
+</script>
+</body>
+</html>

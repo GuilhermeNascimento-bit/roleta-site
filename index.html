@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Di Lione — Pesquisa e Roleta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&display=swap">
+<style>
+  /* ===== Tokens — caixa de pizza (claro) ===== */
+  :root{
+    --bg:#D7B98F;          /* papelão kraft */
+    --bg-deep:#C4A176;
+    --paper:#FBF5E9;       /* muçarela */
+    --paper-2:#F2E7D1;
+    --ink:#2B1E15;
+    --ink-soft:#4F3D2F;
+    --ink-faint:#7A644F;
+    --line:#B48F62;
+    --line-paper:#E3D3B4;
+    --tomato:#B3261E;
+    --tomato-hover:#951E17;
+    --on-tomato:#FFF8EE;
+    --basil:#2F5E36;
+    --error:#A3231B;
+    --focus:#1F4FA3;
+
+    --crust:#D99A52;
+    --crust-dark:#A9692C;
+    --pz-cheese:#EDC35C;
+    --pz-sauce:#C23A22;
+    --pz-basil:#3F6E3A;
+    --pz-choco:#5B3120;
+    --pz-light:#FFF4DE;
+    --pz-dark:#2B1E15;
+    --pz-leaf:#7FAE5C;
+    --pz-pepperoni:#9E2A1A;
+
+    --radius-s:6px;
+    --radius-m:14px;
+    color-scheme:light;
+  }
+  /* ===== Tokens — forno a lenha (escuro) ===== */
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1E1611;
+      --bg-deep:#140E0B;
+      --paper:#2A2019;
+      --paper-2:#342820;
+      --ink:#F4E9D8;
+      --ink-soft:#D2BEA3;
+      --ink-faint:#A48D72;
+      --line:#4A3A2D;
+      --line-paper:#45372B;
+      --tomato:#C93E28;
+      --tomato-hover:#DD5038;
+      --on-tomato:#FFFFFF;
+      --basil:#7FB37F;
+      --error:#F08A7A;
+      --focus:#8DB4FF;
+      --crust:#C98A45;
+      --crust-dark:#8A5422;
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1E1611;
+    --bg-deep:#140E0B;
+    --paper:#2A2019;
+    --paper-2:#342820;
+    --ink:#F4E9D8;
+    --ink-soft:#D2BEA3;
+    --ink-faint:#A48D72;
+    --line:#4A3A2D;
+    --line-paper:#45372B;
+    --tomato:#C93E28;
+    --tomato-hover:#DD5038;
+    --on-tomato:#FFFFFF;
+    --basil:#7FB37F;
+    --error:#F08A7A;
+    --focus:#8DB4FF;
+    --crust:#C98A45;
+    --crust-dark:#8A5422;
+    color-scheme:dark;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background-color:var(--bg);
+    /* fibra de papelão */
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.16 0 0 0 0 0.08 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    color:var(--ink);
+    font-family:'Bricolage Grotesque', system-ui, sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    font-variation-settings:"opsz" 14;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,p{ margin:0; }
+  button{ font:inherit; color:inherit; }
+  :focus-visible{ outline:3px solid var(--focus); outline-offset:3px; }
+
+  .page{
+    max-width:480px;
+    margin:0 auto;
+    padding:20px 16px 48px;
+  }
+
+  /* ===== Topo ===== */
+  .brand{
+    font-weight:800;
+    font-size:19px;
+    font-stretch:80%;
+    letter-spacing:-.01em;
+  }
+  .hero{
+    padding:28px 0 8px;
+  }
+  .hero h1{
+    font-size:clamp(44px, 13vw, 60px);
+    line-height:.92;
+    font-weight:800;
+    font-stretch:75%;
+    letter-spacing:-.02em;
+    font-variation-settings:"opsz" 96;
+    max-width:9ch;
+  }
+  .hero p{
+    margin-top:14px;
+    font-size:17px;
+    line-height:1.45;
+    color:var(--ink-soft);
+    max-width:32ch;
+  }
+
+  /* ===== Pizza-roleta ===== */
+  .wheel-area{
+    padding:24px 0 8px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+  }
+  .wheel-shell{
+    position:relative;
+    width:min(86vw, 330px);
+    aspect-ratio:1;
+  }
+  .wheel-svg{
+    display:block;
+    width:100%;
+    height:100%;
+    transform-origin:50% 50%;
+    transition:transform 4.4s cubic-bezier(.14,.68,.12,1);
+    filter:drop-shadow(0 10px 0 var(--bg-deep));
+  }
+  .wheel-pointer{
+    position:absolute;
+    top:-10px;
+    left:50%;
+    transform:translateX(-50%);
+    width:30px;
+    height:34px;
+    z-index:3;
+  }
+  .wheel-pointer path{ fill:var(--tomato); stroke:var(--paper); stroke-width:2.5; stroke-linejoin:round; }
+  .slice-label{
+    font-family:'Bricolage Grotesque', sans-serif;
+    font-weight:800;
+    font-size:15px;
+    font-stretch:80%;
+  }
+  .hub{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:84px; height:84px;
+    border-radius:50%;
+    border:4px solid var(--paper);
+    background:var(--tomato);
+    color:var(--on-tomato);
+    font-weight:800;
+    font-size:19px;
+    font-stretch:85%;
+    cursor:pointer;
+    z-index:4;
+    box-shadow:0 4px 0 var(--crust-dark);
+    transition:background .15s ease, transform .15s ease;
+  }
+  .hub:hover:not([disabled]){ background:var(--tomato-hover); }
+  .hub:active:not([disabled]){ transform:translate(-50%,-48%); box-shadow:0 2px 0 var(--crust-dark); }
+  .hub[disabled]{
+    background:var(--paper-2);
+    color:var(--ink-faint);
+    cursor:not-allowed;
+    box-shadow:none;
+  }
+  .hub.ready{ animation:nudge 1.2s ease 2; }
+  @keyframes nudge{
+    0%,100%{ transform:translate(-50%,-50%) scale(1); }
+    50%{ transform:translate(-50%,-50%) scale(1.1); }
+  }
+  .wheel-status{
+    text-align:center;
+    font-size:15px;
+    color:var(--ink-soft);
+    max-width:30ch;
+    min-height:1.5em;
+  }
+  .wheel-status a{ color:var(--ink); font-weight:700; }
+  .prize-key{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:6px 16px;
+    font-size:14px;
+    color:var(--ink-soft);
+    padding:0;
+    margin:0;
+    list-style:none;
+  }
+  .prize-key li{ display:flex; align-items:center; gap:6px; }
+  .swatch{
+    width:12px; height:12px;
+    border-radius:50%;
+    border:1.5px solid var(--crust-dark);
+  }
+
+  /* ===== Passos ===== */
+  .steps{
+    list-style:none;
+    margin:28px 0 0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .step{
+    background:var(--paper);
+    border-radius:var(--radius-m);
+    box-shadow:0 3px 0 var(--line);
+    padding:18px;
+  }
+  .step[data-state="locked"]{
+    background:transparent;
+    box-shadow:none;
+    border:2px dashed var(--line);
+  }
+  .step-head{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .step-mark{
+    flex:none;
+    width:30px; height:30px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    font-weight:800;
+    font-size:15px;
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .step[data-state="done"] .step-mark{ background:var(--basil); color:var(--paper); }
+  .step[data-state="locked"] .step-mark{ background:transparent; border:2px solid var(--line); color:var(--ink-soft); }
+  .step-title{
+    font-size:20px;
+    line-height:1.2;
+    font-weight:700;
+    font-stretch:85%;
+  }
+  .step-sub{
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+  .step-body{
+    margin-top:14px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .step-body[hidden]{ display:none; }
+  .step-text{ color:var(--ink-soft); font-size:15.5px; max-width:42ch; }
+
+  /* botões */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-height:50px;
+    padding:12px 20px;
+    border-radius:999px;
+    border:2px solid var(--tomato);
+    background:var(--tomato);
+    color:var(--on-tomato);
+    font-weight:700;
+    font-size:16px;
+    text-decoration:none;
+    cursor:pointer;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .btn:hover{ background:var(--tomato-hover); border-color:var(--tomato-hover); }
+  .btn[disabled]{ opacity:.5; cursor:not-allowed; }
+  .btn-outline{
+    background:transparent;
+    color:var(--ink);
+    border-color:var(--ink);
+  }
+  .btn-outline:hover{ background:var(--paper-2); border-color:var(--ink); }
+  .btn-block{ width:100%; }
+  .text-btn{
+    background:none;
+    border:none;
+    padding:6px 4px;
+    color:var(--ink-soft);
+    text-decoration:underline;
+    text-underline-offset:3px;
+    cursor:pointer;
+    font-size:14px;
+  }
+  .text-btn:hover{ color:var(--ink); }
+
+  /* login */
+  .gsi-wrap{ display:flex; justify-content:center; min-height:44px; }
+  .gsi-wrap[hidden]{ display:none; }
+  .user-chip{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .user-chip[hidden]{ display:none; }
+  .user-chip img{
+    width:40px; height:40px;
+    border-radius:50%;
+    flex:none;
+    background:var(--paper-2);
+  }
+  .user-meta{ display:flex; flex-direction:column; min-width:0; flex:1; line-height:1.3; }
+  .user-meta strong{ font-size:15.5px; }
+  .user-meta span{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  /* pesquisa */
+  .survey{ display:flex; flex-direction:column; gap:22px; }
+  .survey[hidden]{ display:none; }
+  .q{ border:none; margin:0; padding:0; min-width:0; }
+  .q legend, .q-label{
+    padding:0;
+    margin-bottom:10px;
+    font-weight:700;
+    font-size:16px;
+    display:block;
+  }
+  .q.missing legend{ color:var(--error); }
+  .stars{ display:flex; gap:6px; }
+  .star{
+    flex:1;
+    min-height:48px;
+    border-radius:var(--radius-s);
+    border:2px solid var(--line-paper);
+    background:var(--paper-2);
+    color:var(--line);
+    font-size:24px;
+    line-height:1;
+    cursor:pointer;
+    transition:color .12s ease, border-color .12s ease, background .12s ease;
+  }
+  .star.on{ color:var(--tomato); border-color:var(--tomato); background:var(--paper); }
+  .scale-ends{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    color:var(--ink-faint);
+    margin-top:6px;
+  }
+  .pills{ display:flex; gap:8px; }
+  .pill{
+    flex:1;
+    min-height:48px;
+    border-radius:999px;
+    border:2px solid var(--line-paper);
+    background:var(--paper-2);
+    color:var(--ink-soft);
+    font-weight:700;
+    cursor:pointer;
+  }
+  .pill[aria-checked="true"]{ border-color:var(--ink); background:var(--ink); color:var(--paper); }
+  .survey textarea{
+    font:inherit;
+    font-size:16px;
+    padding:12px 14px;
+    min-height:96px;
+    resize:vertical;
+    width:100%;
+    border-radius:var(--radius-s);
+    border:2px solid var(--line-paper);
+    background:var(--paper-2);
+    color:var(--ink);
+  }
+  .survey textarea::placeholder{ color:var(--ink-faint); }
+  .form-error{ font-size:14.5px; color:var(--error); font-weight:600; }
+  .form-error[hidden]{ display:none; }
+  .done-line{ color:var(--ink-soft); font-size:15.5px; }
+
+  /* avaliação opcional */
+  .review{
+    margin-top:28px;
+    padding:20px 18px;
+    border-radius:var(--radius-m);
+    border:2px solid var(--ink);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .review h2{
+    font-size:22px;
+    line-height:1.15;
+    font-weight:800;
+    font-stretch:80%;
+  }
+  .review p{ color:var(--ink-soft); font-size:15.5px; max-width:40ch; }
+
+  /* rodapé */
+  .site-footer{
+    margin-top:36px;
+    padding-top:20px;
+    border-top:2px solid var(--line);
+    font-size:14px;
+    color:var(--ink-soft);
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .site-footer strong{ color:var(--ink); }
+  .staff-panel{
+    margin-top:12px;
+    background:var(--paper);
+    border-radius:var(--radius-m);
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .staff-panel[hidden]{ display:none; }
+  .staff-panel h3{ font-size:17px; color:var(--ink); }
+  .staff-panel input{
+    font-family:ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size:16px;
+    padding:12px;
+    border-radius:var(--radius-s);
+    border:2px solid var(--line-paper);
+    background:var(--paper-2);
+    color:var(--ink);
+    width:100%;
+  }
+  .staff-result{
+    font-size:14.5px;
+    line-height:1.6;
+    padding:12px;
+    border-radius:var(--radius-s);
+    border:2px solid transparent;
+    color:var(--ink);
+    display:none;
+  }
+  .staff-result[data-state="ok"]{ display:block; border-color:var(--basil); }
+  .staff-result[data-state="bad"]{ display:block; border-color:var(--error); }
+  .staff-hint{ font-size:13px; color:var(--ink-faint); }
+
+  /* ===== Cupom ===== */
+  .ticket-overlay{
+    position:fixed;
+    inset:0;
+    background:color-mix(in srgb, var(--bg-deep) 70%, transparent);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:20;
+  }
+  .ticket-overlay[hidden]{ display:none; }
+  .ticket{
+    width:100%;
+    max-width:440px;
+    background:var(--paper);
+    padding:30px 22px calc(26px + env(safe-area-inset-bottom));
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    position:relative;
+    animation:slideUp .45s cubic-bezier(.2,.8,.2,1) both;
+  }
+  /* borda picotada de comanda */
+  .ticket::before{
+    content:"";
+    position:absolute;
+    top:-9px; left:0; right:0;
+    height:10px;
+    background:
+      linear-gradient(135deg, transparent 50%, var(--paper) 50%) 0 0/14px 10px repeat-x,
+      linear-gradient(225deg, transparent 50%, var(--paper) 50%) 0 0/14px 10px repeat-x;
+  }
+  @keyframes slideUp{ from{ transform:translateY(100%); } to{ transform:translateY(0); } }
+  .ticket h2{
+    font-size:16px;
+    font-weight:600;
+    color:var(--ink-soft);
+  }
+  .ticket-prize{
+    font-size:40px;
+    line-height:1;
+    font-weight:800;
+    font-stretch:75%;
+    color:var(--tomato);
+    margin-top:-8px;
+  }
+  .ticket dl{
+    margin:0;
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:8px 16px;
+    padding:14px 0;
+    border-top:2px dashed var(--line-paper);
+    border-bottom:2px dashed var(--line-paper);
+  }
+  .ticket dt{ color:var(--ink-soft); font-size:14px; }
+  .ticket dd{ margin:0; font-weight:700; }
+  .ticket-code{
+    font-family:ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size:15px;
+    word-break:break-all;
+  }
+  .ticket-help{ font-size:15px; color:var(--ink-soft); }
+  .ticket-actions{ display:flex; gap:10px; }
+  .ticket-actions .btn{ flex:1; }
+
+  .toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--ink);
+    color:var(--paper);
+    font-size:14.5px;
+    font-weight:600;
+    padding:12px 18px;
+    border-radius:999px;
+    z-index:30;
+    max-width:calc(100vw - 32px);
+    text-align:center;
+  }
+  .toast[hidden]{ display:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    .wheel-svg{ transition-duration:.6s; }
+    .ticket{ animation:none; }
+    .hub.ready{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="brand">Di Lione</div>
+
+  <header class="hero">
+    <h1>Sua opinião vale uma fatia.</h1>
+    <p>Entre com o Google, conte como foi sua visita e gire a pizza. Todo giro dá uma cortesia para o seu próximo pedido.</p>
+  </header>
+
+  <section class="wheel-area" aria-label="Roleta de prêmios">
+    <div class="wheel-shell">
+      <svg class="wheel-pointer" viewBox="0 0 30 34" aria-hidden="true"><path d="M3 3 H27 L15 31 Z"/></svg>
+      <svg id="wheelSvg" class="wheel-svg" viewBox="-4 -4 308 308" role="img" aria-label="Pizza com oito fatias de prêmios"></svg>
+      <button class="hub" id="spinBtn" type="button" disabled>Girar</button>
+    </div>
+    <p class="wheel-status" id="wheelStatus" aria-live="polite">Entre com o Google e responda a pesquisa para girar.</p>
+    <ul class="prize-key" aria-label="Prêmios possíveis">
+      <li><span class="swatch" style="background:var(--pz-choco)"></span>Doce da casa</li>
+      <li><span class="swatch" style="background:var(--pz-sauce)"></span>Bebida</li>
+      <li><span class="swatch" style="background:var(--pz-basil)"></span>10% de desconto</li>
+      <li><span class="swatch" style="background:var(--pz-cheese)"></span>Fatia de pizza</li>
+    </ul>
+  </section>
+
+  <ol class="steps">
+    <li class="step" id="stepLogin" data-state="active">
+      <div class="step-head">
+        <span class="step-mark" id="loginMark">1</span>
+        <div>
+          <h2 class="step-title">Entre com sua conta Google</h2>
+          <p class="step-sub" id="loginSub">Uma participação por pessoa.</p>
+        </div>
+      </div>
+      <div class="step-body">
+        <p class="step-text" id="loginText">Usamos só seu nome e e-mail para registrar sua pesquisa e seu cupom.</p>
+        <div class="gsi-wrap" id="gsiButton"></div>
+        <div class="user-chip" id="userChip" hidden>
+          <img id="userPic" alt="" referrerpolicy="no-referrer">
+          <div class="user-meta">
+            <strong id="userName"></strong>
+            <span id="userEmail"></span>
+          </div>
+          <button class="text-btn" id="logoutBtn" type="button">Sair</button>
+        </div>
+        <p class="form-error" id="loginError" role="alert" hidden></p>
+      </div>
+    </li>
+
+    <li class="step" id="stepSurvey" data-state="locked">
+      <div class="step-head">
+        <span class="step-mark" id="surveyMark">2</span>
+        <div>
+          <h2 class="step-title">Pesquisa de satisfação</h2>
+          <p class="step-sub" id="surveySub">Libera depois do login.</p>
+        </div>
+      </div>
+      <div class="step-body" id="surveyBody" hidden>
+        <form class="survey" id="surveyForm" novalidate>
+          <div id="surveyQuestions" style="display:flex;flex-direction:column;gap:22px;"></div>
+          <div>
+            <label class="q-label" for="surveyComment">Quer contar mais alguma coisa? (opcional)</label>
+            <textarea id="surveyComment" maxlength="500" placeholder="O que você mais gostou, ou o que podemos melhorar"></textarea>
+          </div>
+          <p class="form-error" id="surveyError" role="alert" hidden></p>
+          <button class="btn btn-block" id="surveySubmit" type="submit">Enviar respostas</button>
+        </form>
+        <div id="surveyDone" hidden>
+          <p class="done-line">Respostas enviadas. Obrigado por nos ajudar a melhorar.</p>
+          <button class="btn btn-block" id="goSpinBtn" type="button" style="margin-top:14px">Girar a pizza</button>
+        </div>
+      </div>
+    </li>
+  </ol>
+
+  <section class="review" aria-labelledby="reviewTitle">
+    <h2 id="reviewTitle">Gostou da visita? Conte no Google.</h2>
+    <p>Sua avaliação ajuda outras pessoas a conhecerem a Di Lione. É opcional e não muda o seu prêmio.</p>
+    <a class="btn btn-outline btn-block" href="https://share.google/PHMQO1NeFKuHtEQFT" target="_blank" rel="noopener">Avaliar no Google</a>
+  </section>
+
+  <footer class="site-footer">
+    <strong>Di Lione Cucina &amp; Pizzeria</strong>
+    <span>Praça Montese, 100, Pau Grande, Magé/RJ</span>
+    <span>WhatsApp (21) 2010-4894 · Instagram @dilione.cucina</span>
+    <div><button class="text-btn" id="staffToggle" type="button" aria-expanded="false" aria-controls="staffPanel">Área da equipe</button></div>
+    <div class="staff-panel" id="staffPanel" hidden>
+      <h3>Conferir cupom</h3>
+      <input type="text" id="staffInput" placeholder="DL-SOB-260909-K3F7-9XQWM" autocapitalize="characters" autocomplete="off" aria-label="Código do cupom">
+      <button class="btn btn-outline btn-block" id="staffCheck" type="button">Conferir cupom</button>
+      <div class="staff-result" id="staffResult" aria-live="polite"></div>
+      <p class="staff-hint">Confira o prazo e resgate uma única vez por cliente. Os cupons também ficam registrados na planilha.</p>
+    </div>
+  </footer>
+
+</div>
+
+<div class="ticket-overlay" id="ticketOverlay" hidden>
+  <div class="ticket" role="dialog" aria-modal="true" aria-labelledby="ticketHeading">
+    <h2 id="ticketHeading">Você ganhou</h2>
+    <p class="ticket-prize" id="ticketPrize">—</p>
+    <dl>
+      <dt>Código</dt>
+      <dd class="ticket-code" id="ticketCode">—</dd>
+      <dt>Válido até</dt>
+      <dd id="ticketValid">—</dd>
+    </dl>
+    <p class="ticket-help">Mostre este código no balcão para usar a cortesia no seu próximo pedido.</p>
+    <div class="ticket-actions">
+      <button class="btn btn-outline" id="copyCodeBtn" type="button">Copiar código</button>
+      <button class="btn" id="closeTicketBtn" type="button">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+  // ===== CONFIGURAÇÃO =====
+  // 1) ID do cliente OAuth (Google Cloud Console → APIs e serviços → Credenciais).
+  // 2) URL do Web App do Google Apps Script (veja apps-script/Code.gs) que grava a pesquisa na planilha.
+  //    Se ficar vazio, a pesquisa é salva só neste aparelho (modo de teste).
+  window.DILIONE_CONFIG = {
+    GOOGLE_CLIENT_ID: "COLE_AQUI_SEU_CLIENT_ID.apps.googleusercontent.com",
+    SURVEY_ENDPOINT: ""
+  };
+</script>
+<script src="https://accounts.google.com/gsi/client" async></script>
+<script>
+(function(){
+  "use strict";
+  var CONFIG = window.DILIONE_CONFIG;
+
+  // ===== Prêmios e códigos =====
+  var PRIZES = {
+    SOB: "Doce da casa",
+    BEB: "Bebida cortesia",
+    D10: "10% de desconto",
+    FAT: "Fatia de pizza"
+  };
+  var SLICE_ORDER = ["SOB","BEB","D10","FAT","SOB","BEB","D10","FAT"];
+  var CODE_VALID_DAYS = 45;
+  var SECRET = "DILIONE-COMANDA-2026";
+  var STORAGE_KEY = "dilione_roleta_v1";
+
+  function fnv1a(str){
+    var h = 0x811c9dc5;
+    for (var i = 0; i < str.length; i++){
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return h >>> 0;
+  }
+  function toBase36(n, len){
+    var s = n.toString(36).toUpperCase();
+    while (s.length < len) s = "0" + s;
+    return s.slice(-len);
+  }
+  function pad2(n){ return n < 10 ? "0" + n : "" + n; }
+  function formatYYMMDD(d){ return pad2(d.getFullYear() % 100) + pad2(d.getMonth() + 1) + pad2(d.getDate()); }
+  function parseYYMMDD(s){
+    return new Date(2000 + parseInt(s.slice(0,2),10), parseInt(s.slice(2,4),10) - 1, parseInt(s.slice(4,6),10));
+  }
+  function formatBR(d){ return pad2(d.getDate()) + "/" + pad2(d.getMonth()+1) + "/" + d.getFullYear(); }
+
+  function generateCode(prizeCode){
+    var dateStr = formatYYMMDD(new Date());
+    var nonce = toBase36(Math.floor(Math.random() * Math.pow(36,4)), 4);
+    var hash = toBase36(fnv1a(prizeCode + "|" + dateStr + "|" + nonce + SECRET), 5);
+    return "DL-" + prizeCode + "-" + dateStr + "-" + nonce + "-" + hash;
+  }
+
+  function verifyCode(raw){
+    var code = (raw || "").trim().toUpperCase();
+    var parts = code.split("-");
+    if (parts.length !== 5 || parts[0] !== "DL") return { valid:false, reason:"O código não está no formato DL-XXX-000000-XXXX-XXXXX." };
+    var prizeCode = parts[1], dateStr = parts[2], nonce = parts[3], hash = parts[4];
+    if (!PRIZES[prizeCode]) return { valid:false, reason:"Prêmio não reconhecido no código." };
+    if (!/^\d{6}$/.test(dateStr)) return { valid:false, reason:"A data dentro do código está incorreta." };
+    var expected = toBase36(fnv1a(prizeCode + "|" + dateStr + "|" + nonce + SECRET), 5);
+    if (expected !== hash) return { valid:false, reason:"A assinatura não confere. Este código não foi gerado pela roleta." };
+    var issued = parseYYMMDD(dateStr);
+    var today = new Date();
+    var diffDays = Math.floor((new Date(today.getFullYear(), today.getMonth(), today.getDate()) - issued) / 86400000);
+    if (diffDays < 0) return { valid:false, reason:"A data de emissão está no futuro. Confira o código digitado." };
+    if (diffDays > CODE_VALID_DAYS) return { valid:false, reason:"Cupom vencido. Foi emitido em " + formatBR(issued) + "." };
+    return { valid:true, prize:PRIZES[prizeCode], issued:issued, expiresAt:new Date(issued.getTime() + CODE_VALID_DAYS*86400000) };
+  }
+
+  // ===== Pizza (SVG) =====
+  var NS = "http://www.w3.org/2000/svg";
+  var wheel = document.getElementById("wheelSvg");
+  var FLAVORS = {
+    SOB: { fill:"var(--pz-choco)",  ink:"var(--pz-light)", label:"Doce",   topping:"sprinkle" },
+    BEB: { fill:"var(--pz-sauce)",  ink:"var(--pz-light)", label:"Bebida", topping:"cheese" },
+    D10: { fill:"var(--pz-basil)",  ink:"var(--pz-light)", label:"10%",    topping:"leaf" },
+    FAT: { fill:"var(--pz-cheese)", ink:"var(--pz-dark)",  label:"Fatia",  topping:"pepperoni" }
+  };
+  function el(name, attrs, parent){
+    var n = document.createElementNS(NS, name);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  function pt(r, deg){
+    var a = (deg - 90) * Math.PI / 180;
+    return [150 + r * Math.cos(a), 150 + r * Math.sin(a)];
+  }
+  function buildPizza(){
+    el("circle", { cx:150, cy:150, r:150, fill:"var(--crust)" }, wheel);
+    for (var s = 0; s < 360; s += 17){
+      var c = pt(143 + (s % 3), s + 4);
+      el("ellipse", { cx:c[0], cy:c[1], rx:4, ry:2.2, fill:"var(--crust-dark)", opacity:.45,
+        transform:"rotate(" + (s + 4) + " " + c[0] + " " + c[1] + ")" }, wheel);
+    }
+    var R = 134;
+    SLICE_ORDER.forEach(function(code, i){
+      var f = FLAVORS[code], a0 = i * 45, a1 = a0 + 45;
+      var p0 = pt(R, a0), p1 = pt(R, a1);
+      el("path", { d:"M150,150 L" + p0[0] + "," + p0[1] + " A" + R + "," + R + " 0 0 1 " + p1[0] + "," + p1[1] + " Z",
+        fill:f.fill, stroke:"var(--crust-dark)", "stroke-width":2.5 }, wheel);
+      [[92,12],[66,29],[96,34],[48,19],[118,22]].forEach(function(t, j){
+        if (j === 4) return; // espaço do rótulo
+        var c = pt(t[0], a0 + t[1]);
+        if (f.topping === "pepperoni"){
+          el("circle", { cx:c[0], cy:c[1], r:7, fill:"var(--pz-pepperoni)" }, wheel);
+          el("circle", { cx:c[0]-2, cy:c[1]-2, r:1.6, fill:"var(--pz-cheese)", opacity:.6 }, wheel);
+        } else if (f.topping === "cheese"){
+          el("ellipse", { cx:c[0], cy:c[1], rx:8, ry:5.5, fill:"var(--pz-cheese)",
+            transform:"rotate(" + (a0 + t[1] * 3) + " " + c[0] + " " + c[1] + ")" }, wheel);
+        } else if (f.topping === "leaf"){
+          el("ellipse", { cx:c[0], cy:c[1], rx:7.5, ry:3.5, fill:"var(--pz-leaf)",
+            transform:"rotate(" + (a0 + t[1] * 4) + " " + c[0] + " " + c[1] + ")" }, wheel);
+        } else {
+          // morango com granulado
+          el("circle", { cx:c[0], cy:c[1], r:6.5, fill:"var(--pz-sauce)" }, wheel);
+          el("circle", { cx:c[0] - 1.8, cy:c[1] - 1.8, r:1.5, fill:"var(--pz-light)", opacity:.7 }, wheel);
+        }
+      });
+      var txt = el("text", { x:150, y:44, "text-anchor":"middle", class:"slice-label", fill:f.ink,
+        transform:"rotate(" + (a0 + 22.5) + " 150 150)" }, wheel);
+      txt.textContent = f.label;
+    });
+  }
+  buildPizza();
+
+  // ===== DOM =====
+  function $(id){ return document.getElementById(id); }
+  var spinBtn = $("spinBtn"), wheelStatus = $("wheelStatus");
+  var ticketOverlay = $("ticketOverlay"), ticketPrize = $("ticketPrize"), ticketCode = $("ticketCode"), ticketValid = $("ticketValid");
+  var copyCodeBtn = $("copyCodeBtn"), closeTicketBtn = $("closeTicketBtn"), toast = $("toast");
+  var staffToggle = $("staffToggle"), staffPanel = $("staffPanel"), staffInput = $("staffInput"), staffCheck = $("staffCheck"), staffResult = $("staffResult");
+  var stepLogin = $("stepLogin"), loginMark = $("loginMark"), loginSub = $("loginSub"), loginText = $("loginText");
+  var gsiButton = $("gsiButton"), loginError = $("loginError"), userChip = $("userChip");
+  var userPic = $("userPic"), userName = $("userName"), userEmail = $("userEmail"), logoutBtn = $("logoutBtn");
+  var stepSurvey = $("stepSurvey"), surveyMark = $("surveyMark"), surveySub = $("surveySub"), surveyBody = $("surveyBody");
+  var surveyForm = $("surveyForm"), surveyQuestions = $("surveyQuestions"), surveyComment = $("surveyComment");
+  var surveyError = $("surveyError"), surveySubmit = $("surveySubmit"), surveyDoneBox = $("surveyDone"), goSpinBtn = $("goSpinBtn");
+
+  var currentRotation = 0;
+  var spinning = false;
+  var hasSpun = false;
+  var lastPrize = null, lastCode = null;
+  var user = null;          // { credential, email, name, picture }
+  var surveyDone = false;
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.hidden = false;
+    window.clearTimeout(showToast._t);
+    showToast._t = window.setTimeout(function(){ toast.hidden = true; }, 2600);
+  }
+  function readSaved(){
+    try { var raw = window.localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+  }
+  function saveResult(prizeCode, code){
+    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ prizeCode:prizeCode, code:code, at:Date.now() })); } catch (e) {}
+  }
+
+  // ===== Pesquisa =====
+  var QUESTIONS = [
+    { id:"atendimento", label:"Como foi o atendimento?", type:"stars" },
+    { id:"comida",      label:"E a comida?", type:"stars" },
+    { id:"espera",      label:"O tempo de espera foi bom?", type:"stars" },
+    { id:"ambiente",    label:"Ambiente e limpeza", type:"stars" },
+    { id:"recomenda",   label:"Você indicaria a Di Lione para alguém?", type:"choice", options:["Sim","Talvez","Não"] }
+  ];
+  var answers = {};
+
+  function renderQuestions(){
+    QUESTIONS.forEach(function(q){
+      var fs = document.createElement("fieldset");
+      fs.className = "q";
+      fs.dataset.q = q.id;
+      var lg = document.createElement("legend");
+      lg.textContent = q.label;
+      fs.appendChild(lg);
+      var group = document.createElement("div");
+      group.setAttribute("role", "radiogroup");
+      group.setAttribute("aria-label", q.label);
+      var buttons = [];
+      var values = q.type === "stars" ? [1,2,3,4,5] : q.options;
+      group.className = q.type === "stars" ? "stars" : "pills";
+      values.forEach(function(v){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = q.type === "stars" ? "star" : "pill";
+        b.textContent = q.type === "stars" ? "★" : v;
+        b.setAttribute("role", "radio");
+        b.setAttribute("aria-checked", "false");
+        if (q.type === "stars") b.setAttribute("aria-label", v + (v === 1 ? " estrela" : " estrelas"));
+        b.dataset.value = String(v);
+        buttons.push(b);
+        group.appendChild(b);
+      });
+      buttons.forEach(function(b, idx){
+        b.addEventListener("click", function(){
+          answers[q.id] = q.type === "stars" ? Number(b.dataset.value) : b.dataset.value;
+          buttons.forEach(function(o, j){
+            o.setAttribute("aria-checked", String(o === b));
+            if (q.type === "stars") o.classList.toggle("on", j <= idx);
+          });
+          fs.classList.remove("missing");
+        });
+      });
+      fs.appendChild(group);
+      if (q.type === "stars"){
+        var ends = document.createElement("div");
+        ends.className = "scale-ends";
+        ends.innerHTML = "<span>Ruim</span><span>Excelente</span>";
+        fs.appendChild(ends);
+      }
+      surveyQuestions.appendChild(fs);
+    });
+  }
+  renderQuestions();
+
+  // ===== Backend (Google Apps Script) =====
+  function api(action, data){
+    if (!CONFIG.SURVEY_ENDPOINT) return Promise.resolve(localApi(action, data));
+    return fetch(CONFIG.SURVEY_ENDPOINT, {
+      method:"POST",
+      headers:{ "Content-Type":"text/plain;charset=utf-8" }, // evita preflight CORS
+      body:JSON.stringify({ action:action, credential:user.credential, data:data || {} })
+    }).then(function(r){ return r.json(); });
+  }
+  function localApi(action, data){
+    var key = "dilione_pesquisa_" + user.email;
+    var rec = null;
+    try { rec = JSON.parse(window.localStorage.getItem(key) || "null"); } catch (e) {}
+    function put(v){ try { window.localStorage.setItem(key, JSON.stringify(v)); } catch (e) {} }
+    if (action === "status") return { ok:true, surveyDone:!!rec, prizeCode:rec && rec.prizeCode, code:rec && rec.code };
+    if (action === "survey"){
+      if (rec) return { ok:false, error:"duplicate" };
+      put({ survey:data, at:Date.now() });
+      return { ok:true };
+    }
+    if (action === "spin"){
+      if (!rec) return { ok:false, error:"no_survey" };
+      if (rec.code) return { ok:true, prizeCode:rec.prizeCode, code:rec.code, existing:true };
+      rec.prizeCode = data.prizeCode; rec.code = data.code; put(rec);
+      return { ok:true };
+    }
+    return { ok:false, error:"unknown" };
+  }
+
+  // ===== Estado da tela =====
+  function refresh(){
+    // passo 1
+    stepLogin.dataset.state = user ? "done" : "active";
+    loginMark.textContent = user ? "✓" : "1";
+    loginSub.textContent = user ? "Conectado." : "Uma participação por pessoa.";
+    loginText.hidden = !!user;
+
+    // passo 2
+    var sState = !user ? "locked" : (surveyDone ? "done" : "active");
+    stepSurvey.dataset.state = sState;
+    surveyMark.textContent = surveyDone ? "✓" : "2";
+    surveyBody.hidden = !user;
+    surveySub.textContent = !user ? "Libera depois do login."
+      : (surveyDone ? "Concluída." : "Cinco perguntas rápidas.");
+    goSpinBtn.hidden = hasSpun;
+
+    // roleta
+    var canSpin = !!user && surveyDone && !hasSpun && !spinning;
+    spinBtn.disabled = !canSpin;
+    if (hasSpun){
+      wheelStatus.innerHTML = 'Você já girou. <a href="#" id="reopenTicket">Ver meu cupom</a>';
+    } else if (spinning){
+      wheelStatus.textContent = "Girando…";
+    } else if (canSpin){
+      wheelStatus.textContent = "Tudo pronto. Toque em Girar no centro da pizza.";
+    } else if (user){
+      wheelStatus.textContent = "Responda a pesquisa abaixo para liberar o giro.";
+    } else {
+      wheelStatus.textContent = "Entre com o Google e responda a pesquisa para girar.";
+    }
+  }
+
+  // ===== Login Google =====
+  function decodeJwt(token){
+    var p = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    while (p.length % 4) p += "=";
+    var json = decodeURIComponent(atob(p).split("").map(function(c){
+      return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(""));
+    return JSON.parse(json);
+  }
+  function showLoginError(msg){
+    loginError.textContent = msg;
+    loginError.hidden = !msg;
+  }
+
+  function onCredential(resp){
+    var info;
+    try { info = decodeJwt(resp.credential); }
+    catch (e){ showLoginError("Não conseguimos ler sua conta Google. Tente entrar de novo."); return; }
+    user = { credential:resp.credential, email:(info.email || "").toLowerCase(), name:info.name || info.email, picture:info.picture || "" };
+    showLoginError("");
+    gsiButton.hidden = true;
+    userChip.hidden = false;
+    userName.textContent = user.name;
+    userEmail.textContent = user.email;
+    if (user.picture) userPic.src = user.picture; else userPic.removeAttribute("src");
+    refresh();
+
+    api("status").then(function(res){
+      if (!res || !res.ok){
+        showLoginError(res && res.error === "auth"
+          ? "Sua sessão do Google expirou. Toque em Sair e entre de novo."
+          : "Não conseguimos verificar sua participação. Recarregue a página.");
+        return;
+      }
+      if (res.surveyDone) markSurveyDone();
+      if (res.code) restoreSpin(res.prizeCode, res.code);
+      refresh();
+    }).catch(function(){
+      showLoginError("Sem conexão com o servidor. Verifique sua internet e recarregue a página.");
+    });
+  }
+
+  function initGoogle(){
+    if (!window.google || !google.accounts || !google.accounts.id) return false;
+    if (!CONFIG.GOOGLE_CLIENT_ID || CONFIG.GOOGLE_CLIENT_ID.indexOf("COLE_AQUI") === 0){
+      showLoginError("Login do Google não configurado: preencha GOOGLE_CLIENT_ID no index.html.");
+      return true;
+    }
+    google.accounts.id.initialize({
+      client_id: CONFIG.GOOGLE_CLIENT_ID,
+      callback: onCredential,
+      auto_select: true,
+      ux_mode: "popup"
+    });
+    google.accounts.id.renderButton(gsiButton, {
+      theme: "outline", size: "large", shape: "pill",
+      text: "continue_with", locale: "pt-BR", width: 280
+    });
+    google.accounts.id.prompt();
+    return true;
+  }
+  (function waitGoogle(tries){
+    if (initGoogle()) return;
+    if (tries > 100){ showLoginError("O login do Google não carregou. Verifique sua internet e recarregue a página."); return; }
+    window.setTimeout(function(){ waitGoogle(tries + 1); }, 100);
+  })(0);
+
+  logoutBtn.addEventListener("click", function(){
+    if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
+    window.location.reload();
+  });
+
+  // ===== Envio da pesquisa =====
+  function markSurveyDone(){
+    surveyDone = true;
+    surveyForm.hidden = true;
+    surveyDoneBox.hidden = false;
+  }
+
+  surveyForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    if (!user) return;
+    var missing = QUESTIONS.filter(function(q){ return answers[q.id] === undefined; });
+    surveyQuestions.querySelectorAll(".q").forEach(function(fs){
+      fs.classList.toggle("missing", answers[fs.dataset.q] === undefined);
+    });
+    if (missing.length){
+      surveyError.textContent = missing.length === 1
+        ? "Falta responder: " + missing[0].label
+        : "Faltam " + missing.length + " perguntas. Elas estão marcadas em vermelho.";
+      surveyError.hidden = false;
+      return;
+    }
+    surveyError.hidden = true;
+    surveySubmit.disabled = true;
+    surveySubmit.textContent = "Enviando…";
+    var payload = {};
+    QUESTIONS.forEach(function(q){ payload[q.id] = answers[q.id]; });
+    payload.comentario = surveyComment.value.trim().slice(0, 500);
+
+    api("survey", payload).then(function(res){
+      if (res && (res.ok || res.error === "duplicate")){
+        markSurveyDone();
+        if (res.error === "duplicate") showToast("Esta conta já tinha respondido a pesquisa.");
+        refresh();
+        spinBtn.classList.add("ready");
+      } else {
+        throw new Error(res && res.error);
+      }
+    }).catch(function(err){
+      surveyError.textContent = (err && err.message === "auth")
+        ? "Sua sessão do Google expirou. Toque em Sair e entre de novo."
+        : "As respostas não foram enviadas. Verifique sua internet e toque em Enviar respostas de novo.";
+      surveyError.hidden = false;
+      surveySubmit.disabled = false;
+      surveySubmit.textContent = "Enviar respostas";
+    });
+  });
+
+  goSpinBtn.addEventListener("click", function(){
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.querySelector(".wheel-area").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block:"center" });
+    window.setTimeout(doSpin, reduce ? 0 : 500);
+  });
+
+  // ===== Giro =====
+  function snapWheel(prizeCode){
+    var idx = SLICE_ORDER.indexOf(prizeCode);
+    if (idx < 0) return;
+    currentRotation = (360 - (idx * 45 + 22.5)) % 360;
+    wheel.style.transition = "none";
+    wheel.style.transform = "rotate(" + currentRotation + "deg)";
+    window.setTimeout(function(){ wheel.style.transition = ""; }, 50);
+  }
+
+  function openTicket(prizeCode, code){
+    var v = verifyCode(code);
+    ticketPrize.textContent = PRIZES[prizeCode] || "—";
+    ticketCode.textContent = code;
+    ticketValid.textContent = v.valid ? formatBR(v.expiresAt) : "—";
+    ticketOverlay.hidden = false;
+    closeTicketBtn.focus();
+  }
+
+  function restoreSpin(prizeCode, code){
+    saveResult(prizeCode, code);
+    hasSpun = true;
+    lastPrize = prizeCode; lastCode = code;
+    snapWheel(prizeCode);
+  }
+
+  function doSpin(){
+    if (spinning || !user || !surveyDone || hasSpun) return;
+    spinning = true;
+    spinBtn.classList.remove("ready");
+    refresh();
+
+    var index = Math.floor(Math.random() * SLICE_ORDER.length);
+    var jitter = (Math.random() * 26) - 13;
+    var targetNative = (index * 45 + 22.5 + jitter + 360) % 360;
+    var targetMod = (360 - targetNative) % 360;
+    var deltaMod = ((targetMod - (currentRotation % 360)) + 360) % 360;
+    currentRotation = currentRotation + 6 * 360 + deltaMod;
+    wheel.style.transform = "rotate(" + currentRotation + "deg)";
+
+    window.setTimeout(function(){
+      var a = (360 - (currentRotation % 360)) % 360;
+      var prizeCode = SLICE_ORDER[Math.min(7, Math.floor(a / 45))];
+      var code = generateCode(prizeCode);
+      api("spin", { prizeCode:prizeCode, code:code }).then(function(res){
+        if (res && res.ok && res.existing){
+          prizeCode = res.prizeCode; code = res.code;   // esta conta já tinha cupom
+          snapWheel(prizeCode);
+        } else if (!res || !res.ok){
+          throw new Error(res && res.error);
+        }
+        spinning = false;
+        restoreSpin(prizeCode, code);
+        openTicket(prizeCode, code);
+        refresh();
+      }).catch(function(){
+        spinning = false;
+        showToast("O giro não foi registrado. Verifique sua internet e gire de novo.");
+        refresh();
+      });
+    }, 4500);
+  }
+  spinBtn.addEventListener("click", doSpin);
+
+  wheelStatus.addEventListener("click", function(e){
+    if (e.target && e.target.id === "reopenTicket"){
+      e.preventDefault();
+      if (lastCode) openTicket(lastPrize, lastCode);
+    }
+  });
+
+  // ===== Cupom =====
+  copyCodeBtn.addEventListener("click", function(){
+    var text = ticketCode.textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ showToast("Código copiado"); })
+        .catch(function(){ showToast("Não deu para copiar. Selecione o código e copie manualmente."); });
+    } else {
+      showToast("Selecione o código e copie manualmente.");
+    }
+  });
+  closeTicketBtn.addEventListener("click", function(){ ticketOverlay.hidden = true; });
+  ticketOverlay.addEventListener("click", function(e){ if (e.target === ticketOverlay) ticketOverlay.hidden = true; });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") ticketOverlay.hidden = true; });
+
+  // ===== Equipe =====
+  staffToggle.addEventListener("click", function(){
+    staffPanel.hidden = !staffPanel.hidden;
+    staffToggle.setAttribute("aria-expanded", String(!staffPanel.hidden));
+    if (!staffPanel.hidden) staffInput.focus();
+  });
+  function runStaffCheck(){
+    var v = verifyCode(staffInput.value);
+    if (v.valid){
+      staffResult.dataset.state = "ok";
+      staffResult.innerHTML = "<strong>Cupom válido.</strong><br>Prêmio: " + v.prize +
+        "<br>Emitido em " + formatBR(v.issued) + "<br>Vale até " + formatBR(v.expiresAt);
+    } else {
+      staffResult.dataset.state = "bad";
+      staffResult.innerHTML = "<strong>Cupom inválido.</strong><br>" + v.reason;
+    }
+  }
+  staffCheck.addEventListener("click", runStaffCheck);
+  staffInput.addEventListener("keydown", function(e){ if (e.key === "Enter") runStaffCheck(); });
+
+  // giro anterior neste aparelho
+  var saved = readSaved();
+  if (saved && saved.code && PRIZES[saved.prizeCode]){
+    restoreSpin(saved.prizeCode, saved.code);
+  }
+  refresh();
+})();
+</script>
+</body>
+</html>
