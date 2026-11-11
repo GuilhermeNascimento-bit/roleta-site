@@ -5,166 +5,408 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cartaz de Mesa Di Lione</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;0,6..96,700;1,6..96,600&family=Work+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
+  /* ===== Tela (em volta do cartaz) — segue o tema do site ===== */
   :root{
-    --bg:#131010; --surface:#1d1815; --text:#f4ecdd; --text-muted:#b6a68d;
-    --accent:#cda454; --accent-strong:#e6c374; --line:#3a332c; --shadow:rgba(0,0,0,.5);
+    --bg:#E9DCC6;
+    --ink:#2B1E15;
+    --ink-soft:#4F3D2F;
+    --line:#C9B08A;
+    --tomato:#B3261E;
+    --tomato-hover:#951E17;
+    --on-tomato:#FFF8EE;
+    --focus:#1F4FA3;
+    color-scheme:light;
   }
-  @media (prefers-color-scheme: light){
-    :root:not([data-theme="dark"]){
-      --bg:#f4ecda; --surface:#fffcf4; --text:#221a12; --text-muted:#6b5d48;
-      --accent:#a8792a; --accent-strong:#8a621f; --line:#e2d5b5; --shadow:rgba(60,40,10,.16);
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1E1611;
+      --ink:#F4E9D8;
+      --ink-soft:#D2BEA3;
+      --line:#4A3A2D;
+      --tomato:#C93E28;
+      --tomato-hover:#DD5038;
+      --on-tomato:#FFFFFF;
+      --focus:#8DB4FF;
+      color-scheme:dark;
     }
   }
-  :root[data-theme="light"]{
-    --bg:#f4ecda; --surface:#fffcf4; --text:#221a12; --text-muted:#6b5d48;
-    --accent:#a8792a; --accent-strong:#8a621f; --line:#e2d5b5; --shadow:rgba(60,40,10,.16);
+  :root[data-theme="dark"]{
+    --bg:#1E1611; --ink:#F4E9D8; --ink-soft:#D2BEA3; --line:#4A3A2D;
+    --tomato:#C93E28; --tomato-hover:#DD5038; --on-tomato:#FFFFFF; --focus:#8DB4FF;
+    color-scheme:dark;
   }
+
   *{ box-sizing:border-box; }
-  html{ color-scheme:dark light; }
-  body{ margin:0; background:var(--bg); color:var(--text); font-family:'Work Sans', sans-serif; }
-  h1,h2{ font-family:'Bodoni Moda', Georgia, serif; text-wrap:balance; margin:0; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Bricolage Grotesque', system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,p{ margin:0; }
+  :focus-visible{ outline:3px solid var(--focus); outline-offset:3px; }
 
-  .wrap{ max-width:640px; margin:0 auto; padding:28px 20px 48px; display:flex; flex-direction:column; gap:18px; }
-  .toolbar{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    flex-wrap:wrap;
-  }
-  .toolbar p{ color:var(--text-muted); font-size:13.5px; margin:0; max-width:38ch; }
-  .btn{
-    font-family:'Work Sans', sans-serif; font-weight:600; font-size:14px;
-    padding:11px 18px; border:1px solid var(--accent); background:var(--accent);
-    color:#221a12; cursor:pointer; letter-spacing:.02em;
-  }
-  .btn:hover{ background:var(--accent-strong); border-color:var(--accent-strong); }
-  .hint{
-    font-size:12.5px; color:var(--text-muted); font-style:italic;
-  }
-
-  /* the physical card — deliberately fixed light print colors, independent of theme */
-  .sheet{
-    background:#fffaf0;
-    border:1px solid #e2d5b5;
-    box-shadow:0 18px 40px -18px var(--shadow);
-    width:100%;
-    aspect-ratio:105/148; /* A6 portrait ratio, two panels stacked = A5 sheet */
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:28px 16px 48px;
     display:flex;
     flex-direction:column;
-    color:#221a12;
-    overflow:hidden;
+    gap:20px;
   }
+  .toolbar{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .toolbar h1{
+    font-size:28px;
+    font-weight:800;
+    font-stretch:80%;
+    line-height:1.05;
+  }
+  .toolbar p{ color:var(--ink-soft); font-size:15px; margin-top:6px; max-width:46ch; line-height:1.45; }
+  .tools{ display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+  .toggle{ display:flex; align-items:center; gap:8px; font-size:14px; color:var(--ink-soft); cursor:pointer; }
+  .toggle input{ width:18px; height:18px; accent-color:var(--tomato); }
+  .btn{
+    font:inherit;
+    font-weight:700;
+    font-size:16px;
+    min-height:48px;
+    padding:12px 26px;
+    border-radius:999px;
+    border:2px solid var(--tomato);
+    background:var(--tomato);
+    color:var(--on-tomato);
+    cursor:pointer;
+  }
+  .btn:hover{ background:var(--tomato-hover); border-color:var(--tomato-hover); }
+  .hint{ font-size:14px; color:var(--ink-soft); line-height:1.5; }
+
+  /* ===== O cartaz impresso — cores fixas, independentes do tema ===== */
+  .sheet{
+    --kraft:#D7B98F;
+    --kraft-deep:#C4A176;
+    --paper:#FBF5E9;
+    --p-ink:#2B1E15;
+    --p-soft:#4F3D2F;
+    --p-tomato:#B3261E;
+    --p-line:#A9875C;
+    --crust:#D99A52;
+    --crust-dark:#A9692C;
+    --pz-cheese:#EDC35C;
+    --pz-sauce:#C23A22;
+    --pz-basil:#3F6E3A;
+    --pz-choco:#5B3120;
+    --pz-light:#FFF4DE;
+    --pz-dark:#2B1E15;
+    --pz-leaf:#7FAE5C;
+    --pz-pepperoni:#9E2A1A;
+
+    width:100%;
+    aspect-ratio:210 / 297;           /* A4 em pé, dobrado ao meio */
+    display:flex;
+    flex-direction:column;
+    background-color:var(--kraft);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.16 0 0 0 0 0.08 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    color:var(--p-ink);
+    box-shadow:0 10px 0 var(--kraft-deep);
+    overflow:hidden;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  /* para imprimir direto em papel kraft: sem fundo impresso */
+  .sheet.no-fill{
+    background-color:#fff;
+    background-image:none;
+    outline:1px solid var(--line);
+    box-shadow:none;
+  }
+
   .panel{
     flex:1;
+    position:relative;
+    container-type:size;
+    overflow:hidden;
+  }
+  .panel.flip{ transform:rotate(180deg); }
+  .panel-inner{
+    position:absolute;
+    inset:0;
+    display:grid;
+    grid-template-columns:1fr 38cqw;
+    gap:4cqw;
+    padding:6cqw 6.5cqw;
+    align-items:center;
+  }
+  .p-text{
+    display:flex;
+    flex-direction:column;
+    gap:2.6cqw;
+    position:relative;
+    z-index:2;
+  }
+  .p-brand{
+    font-weight:800;
+    font-stretch:80%;
+    font-size:3cqw;
+  }
+  .p-title{
+    font-size:8.6cqw;
+    line-height:.9;
+    font-weight:800;
+    font-stretch:75%;
+    letter-spacing:-.02em;
+    font-variation-settings:"opsz" 96;
+  }
+  .p-sub{
+    font-size:2.5cqw;
+    line-height:1.4;
+    color:var(--p-soft);
+    max-width:30ch;
+  }
+  .p-steps{
+    list-style:none;
+    margin:.6cqw 0 0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:1.4cqw;
+  }
+  .p-steps li{
+    display:flex;
+    align-items:center;
+    gap:1.6cqw;
+    font-size:2.5cqw;
+    font-weight:700;
+  }
+  .p-steps .n{
+    flex:none;
+    width:4cqw; height:4cqw;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:var(--p-ink);
+    color:var(--paper);
+    font-size:2.1cqw;
+    font-weight:800;
+  }
+  .p-steps li:last-child .n{ background:var(--p-tomato); }
+  .p-fine{
+    font-size:1.75cqw;
+    color:var(--p-soft);
+  }
+
+  /* lado direito: pizza com o QR em cima, como etiqueta na caixa */
+  .p-visual{
+    position:relative;
+    align-self:stretch;
+    display:grid;
+    place-items:center;
+  }
+  .p-pizza{
+    position:absolute;
+    width:56cqw;
+    height:56cqw;
+    right:-17cqw;
+    top:50%;
+    transform:translateY(-50%) rotate(-12deg);
+    z-index:0;
+  }
+  .qr-tile{
+    position:relative;
+    z-index:1;
+    width:31cqw;
+    background:var(--paper);
+    border-radius:2.2cqw;
+    padding:2.2cqw 2.2cqw 1.6cqw;
+    box-shadow:0 1cqw 0 rgba(43,30,21,.35);
     display:flex;
     flex-direction:column;
     align-items:center;
-    justify-content:center;
-    gap:14px;
-    padding:6% 8%;
-    text-align:center;
-    position:relative;
+    gap:1.2cqw;
   }
-  .panel.flip{ transform:rotate(180deg); }
-  .fold-line{
-    border-top:1px dashed #c9b98c;
-    position:relative;
+  .qr{
+    width:100%;
+    aspect-ratio:1;
+    background:#fff;
+    padding:1.4cqw;
+    border-radius:1cqw;
+    line-height:0;
+  }
+  .qr img, .qr canvas{ width:100% !important; height:auto !important; display:block; }
+  .qr-cta{
+    font-size:2.5cqw;
+    font-weight:800;
+    font-stretch:85%;
+    color:var(--p-tomato);
+  }
+
+  .fold{
     flex:none;
+    height:0;
+    border-top:1.5px dashed var(--p-line);
+    position:relative;
   }
-  .fold-label{
-    position:absolute; left:50%; top:-8px; transform:translateX(-50%);
-    background:#fffaf0; color:#a8792a; font-family:'Space Mono', monospace;
-    font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:0 8px;
+  .fold span{
+    position:absolute;
+    left:50%;
+    top:0;
+    transform:translate(-50%, -50%);
+    background:var(--kraft);
+    color:var(--p-soft);
+    font-size:11px;
+    padding:0 10px;
   }
-  .p-eyebrow{
-    font-family:'Space Mono', monospace; font-size:10px; letter-spacing:.16em;
-    text-transform:uppercase; color:#a8792a;
+  .sheet.no-fill .fold span{ background:#fff; }
+
+  @media (max-width:520px){
+    .toolbar{ flex-direction:column; align-items:stretch; }
+    .tools{ align-items:stretch; }
   }
-  .p-title{
-    font-size:clamp(20px,6vw,26px); font-weight:700; font-style:italic; line-height:1.15;
-  }
-  .p-sub{ font-size:12px; color:#6b5d48; max-width:26ch; line-height:1.45; }
-  .qr-box{
-    background:#fff; padding:10px; border:1px solid #e2d5b5; line-height:0;
-  }
-  .p-steps{
-    display:flex; flex-direction:column; gap:3px; font-size:11px; color:#4a3f2c;
-    font-family:'Space Mono', monospace;
-  }
-  .p-url{ font-size:9.5px; color:#8a7350; word-break:break-all; font-family:'Space Mono', monospace; }
-  .p-footer{ font-size:9px; color:#8a7350; margin-top:2px; }
 
   @media print{
-    body{ background:#fff; }
+    @page{ size:A4 portrait; margin:0; }
+    html, body{ background:#fff; }
     .toolbar, .hint{ display:none; }
-    .wrap{ padding:0; max-width:none; }
-    .sheet{ box-shadow:none; border:none; aspect-ratio:auto; height:100vh; }
-    @page{ margin:10mm; }
+    .wrap{ padding:0; max-width:none; gap:0; }
+    .sheet{ width:210mm; height:297mm; aspect-ratio:auto; box-shadow:none; outline:none; }
+    .fold span{ display:none; }
   }
 </style>
 </head>
 <body>
 
 <div class="wrap">
-  <div class="toolbar no-print">
-    <p>Cartaz de mesa em formato tenda: dobre na linha pontilhada e cole as bordas para ficar em pé, visível dos dois lados da mesa.</p>
-    <button class="btn" id="printBtn" type="button">Imprimir</button>
-  </div>
-
-  <div class="sheet">
-    <div class="panel" id="panelTop">
-      <div class="p-eyebrow">Di Lione &middot; Cucina &amp; Pizzeria</div>
-      <h2 class="p-title">Opine e&nbsp;Ganhe</h2>
-      <p class="p-sub">Escaneie, dê sua nota e gire a pizza para ganhar uma cortesia no seu próximo pedido.</p>
-      <div class="qr-box" id="qrTop"></div>
-      <div class="p-steps">
-        <span>01 · Escaneie o código</span>
-        <span>02 · Dê sua nota</span>
-        <span>03 · Gire e ganhe seu brinde</span>
-      </div>
+  <div class="toolbar">
+    <div>
+      <h1>Cartaz de mesa</h1>
+      <p>Imprima em A4, dobre na linha tracejada e cole as pontas: vira uma tenda que mostra o QR dos dois lados da mesa.</p>
     </div>
-
-    <div class="fold-line"><span class="fold-label">Dobre aqui</span></div>
-
-    <div class="panel flip" id="panelBottom">
-      <div class="p-eyebrow">Di Lione &middot; Cucina &amp; Pizzeria</div>
-      <h2 class="p-title">Opine e&nbsp;Ganhe</h2>
-      <p class="p-sub">Escaneie, dê sua nota e gire a pizza para ganhar uma cortesia no seu próximo pedido.</p>
-      <div class="qr-box" id="qrBottom"></div>
-      <div class="p-steps">
-        <span>01 · Escaneie o código</span>
-        <span>02 · Dê sua nota</span>
-        <span>03 · Gire e ganhe seu brinde</span>
-      </div>
+    <div class="tools">
+      <label class="toggle"><input type="checkbox" id="noFill"> Vou imprimir em papel kraft (sem fundo)</label>
+      <button class="btn" id="printBtn" type="button">Imprimir cartaz</button>
     </div>
   </div>
 
-  <p class="hint">Dica: imprima em papel um pouco mais rígido (couché/cartão) para o cartaz ficar firme em pé na mesa.</p>
+  <div class="sheet" id="sheet">
+    <div class="panel flip" aria-hidden="true" id="panelBack"></div>
+    <div class="fold"><span>dobre aqui</span></div>
+    <div class="panel" id="panelFront">
+      <div class="panel-inner">
+        <div class="p-text">
+          <div class="p-brand">Di Lione</div>
+          <h2 class="p-title">Sua opinião vale uma fatia.</h2>
+          <p class="p-sub">Dê sua nota e gire a pizza. Todo giro dá uma cortesia para o seu próximo pedido.</p>
+          <ol class="p-steps">
+            <li><span class="n">1</span>Aponte a câmera para o QR</li>
+            <li><span class="n">2</span>Entre com o Google e dê sua nota</li>
+            <li><span class="n">3</span>Gire a pizza e ganhe</li>
+          </ol>
+          <p class="p-fine">Uma participação por conta Google.</p>
+        </div>
+        <div class="p-visual">
+          <svg class="p-pizza" viewBox="-4 -4 308 308" aria-hidden="true"></svg>
+          <div class="qr-tile">
+            <div class="qr"></div>
+            <span class="qr-cta">Escaneie aqui</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint">Dica: papel de 180 g ou mais (cartão ou couché) deixa a tenda firme em pé. No diálogo de impressão, escolha A4, margens "Nenhuma" e ative "Gráficos de fundo".</p>
 </div>
 
 <script>
 (function(){
   "use strict";
-  // TODO: troque pela URL final do index.html depois de hospedar no Netlify
   var TARGET_URL = "https://roleta-site-h1kh.onrender.com";
 
-  function makeQR(elId){
-    new QRCode(document.getElementById(elId), {
-      text: TARGET_URL,
-      width: 132,
-      height: 132,
-      colorDark: "#221a12",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.H
+  // ---- pizza (mesmo desenho do site) ----
+  var NS = "http://www.w3.org/2000/svg";
+  var SLICE_ORDER = ["SOB","BEB","D10","FAT","SOB","BEB","D10","FAT"];
+  var FLAVORS = {
+    SOB: { fill:"var(--pz-choco)",  ink:"var(--pz-light)", label:"Doce",   topping:"berry" },
+    BEB: { fill:"var(--pz-sauce)",  ink:"var(--pz-light)", label:"Bebida", topping:"cheese" },
+    D10: { fill:"var(--pz-basil)",  ink:"var(--pz-light)", label:"10%",    topping:"leaf" },
+    FAT: { fill:"var(--pz-cheese)", ink:"var(--pz-dark)",  label:"Fatia",  topping:"pepperoni" }
+  };
+  function el(name, attrs, parent){
+    var n = document.createElementNS(NS, name);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    parent.appendChild(n);
+    return n;
+  }
+  function pt(r, deg){
+    var a = (deg - 90) * Math.PI / 180;
+    return [150 + r * Math.cos(a), 150 + r * Math.sin(a)];
+  }
+  function buildPizza(svg){
+    el("circle", { cx:150, cy:150, r:150, fill:"var(--crust)" }, svg);
+    for (var s = 0; s < 360; s += 17){
+      var c0 = pt(143 + (s % 3), s + 4);
+      el("ellipse", { cx:c0[0], cy:c0[1], rx:4, ry:2.2, fill:"var(--crust-dark)", opacity:.45,
+        transform:"rotate(" + (s + 4) + " " + c0[0] + " " + c0[1] + ")" }, svg);
+    }
+    var R = 134;
+    SLICE_ORDER.forEach(function(code, i){
+      var f = FLAVORS[code], a0 = i * 45, a1 = a0 + 45;
+      var p0 = pt(R, a0), p1 = pt(R, a1);
+      el("path", { d:"M150,150 L" + p0[0] + "," + p0[1] + " A" + R + "," + R + " 0 0 1 " + p1[0] + "," + p1[1] + " Z",
+        fill:f.fill, stroke:"var(--crust-dark)", "stroke-width":2.5 }, svg);
+      [[92,12],[66,29],[96,34],[48,19]].forEach(function(t){
+        var c = pt(t[0], a0 + t[1]);
+        if (f.topping === "pepperoni"){
+          el("circle", { cx:c[0], cy:c[1], r:7, fill:"var(--pz-pepperoni)" }, svg);
+        } else if (f.topping === "cheese"){
+          el("ellipse", { cx:c[0], cy:c[1], rx:8, ry:5.5, fill:"var(--pz-cheese)",
+            transform:"rotate(" + (a0 + t[1] * 3) + " " + c[0] + " " + c[1] + ")" }, svg);
+        } else if (f.topping === "leaf"){
+          el("ellipse", { cx:c[0], cy:c[1], rx:7.5, ry:3.5, fill:"var(--pz-leaf)",
+            transform:"rotate(" + (a0 + t[1] * 4) + " " + c[0] + " " + c[1] + ")" }, svg);
+        } else {
+          el("circle", { cx:c[0], cy:c[1], r:6.5, fill:"var(--pz-sauce)" }, svg);
+        }
+      });
+      var txt = el("text", { x:150, y:44, "text-anchor":"middle", fill:f.ink,
+        "font-family":"Bricolage Grotesque, sans-serif", "font-weight":800, "font-size":15,
+        transform:"rotate(" + (a0 + 22.5) + " 150 150)" }, svg);
+      txt.textContent = f.label;
     });
   }
-  makeQR("qrTop");
-  makeQR("qrBottom");
 
-  document.getElementById("printBtn").addEventListener("click", function(){
-    window.print();
+  // ---- monta a face da frente, copia para o verso (girado) e gera os QRs ----
+  var front = document.getElementById("panelFront");
+  var back = document.getElementById("panelBack");
+  back.innerHTML = front.innerHTML;
+
+  document.querySelectorAll(".p-pizza").forEach(buildPizza);
+  document.querySelectorAll(".qr").forEach(function(box){
+    new QRCode(box, {
+      text: TARGET_URL,
+      width: 512,
+      height: 512,
+      colorDark: "#2B1E15",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+    box.setAttribute("title", TARGET_URL);
   });
+
+  var sheet = document.getElementById("sheet");
+  var noFill = document.getElementById("noFill");
+  noFill.addEventListener("change", function(){ sheet.classList.toggle("no-fill", noFill.checked); });
+  document.getElementById("printBtn").addEventListener("click", function(){ window.print(); });
 })();
 </script>
 </body>
