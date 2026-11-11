@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Di Lione — Pesquisa e Roleta</title>
+<title>Di Lione — Roleta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&display=swap">
@@ -540,6 +540,14 @@
   .ticket-help{ font-size:15px; color:var(--ink-soft); }
   .ticket-actions{ display:flex; gap:10px; }
   .ticket-actions .btn{ flex:1; }
+  .ticket-review{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding-top:16px;
+    border-top:2px dashed var(--line-paper);
+  }
+  .ticket-review p{ font-size:15px; color:var(--ink-soft); }
 
   .toast{
     position:fixed;
@@ -582,7 +590,7 @@
       <svg id="wheelSvg" class="wheel-svg" viewBox="-4 -4 308 308" role="img" aria-label="Pizza com oito fatias de prêmios"></svg>
       <button class="hub" id="spinBtn" type="button" disabled>Girar</button>
     </div>
-    <p class="wheel-status" id="wheelStatus" aria-live="polite">Entre com o Google e responda a pesquisa para girar.</p>
+    <p class="wheel-status" id="wheelStatus" aria-live="polite">Entre com o Google e dê sua nota para girar.</p>
     <ul class="prize-key" aria-label="Prêmios possíveis">
       <li><span class="swatch" style="background:var(--pz-choco)"></span>Doce da casa</li>
       <li><span class="swatch" style="background:var(--pz-sauce)"></span>Bebida</li>
@@ -601,7 +609,7 @@
         </div>
       </div>
       <div class="step-body">
-        <p class="step-text" id="loginText">Usamos só seu nome e e-mail para registrar sua pesquisa e seu cupom.</p>
+        <p class="step-text" id="loginText">Usamos só seu nome e e-mail para registrar sua nota e seu cupom.</p>
         <div class="gsi-wrap" id="gsiButton"></div>
         <div class="user-chip" id="userChip" hidden>
           <img id="userPic" alt="" referrerpolicy="no-referrer">
@@ -619,23 +627,22 @@
       <div class="step-head">
         <span class="step-mark" id="surveyMark">2</span>
         <div>
-          <h2 class="step-title">Pesquisa de satisfação</h2>
+          <h2 class="step-title">Como foi sua visita?</h2>
           <p class="step-sub" id="surveySub">Libera depois do login.</p>
         </div>
       </div>
       <div class="step-body" id="surveyBody" hidden>
         <form class="survey" id="surveyForm" novalidate>
-          <div id="surveyQuestions" style="display:flex;flex-direction:column;gap:22px;"></div>
+          <div id="surveyQuestions"></div>
           <div>
-            <label class="q-label" for="surveyComment">Quer contar mais alguma coisa? (opcional)</label>
+            <label class="q-label" for="surveyComment">Quer contar mais? (opcional)</label>
             <textarea id="surveyComment" maxlength="500" placeholder="O que você mais gostou, ou o que podemos melhorar"></textarea>
           </div>
           <p class="form-error" id="surveyError" role="alert" hidden></p>
-          <button class="btn btn-block" id="surveySubmit" type="submit">Enviar respostas</button>
+          <button class="btn btn-block" id="surveySubmit" type="submit">Enviar e girar a pizza</button>
         </form>
         <div id="surveyDone" hidden>
-          <p class="done-line">Respostas enviadas. Obrigado por nos ajudar a melhorar.</p>
-          <button class="btn btn-block" id="goSpinBtn" type="button" style="margin-top:14px">Girar a pizza</button>
+          <p class="done-line">Nota enviada. Obrigado!</p>
         </div>
       </div>
     </li>
@@ -643,8 +650,8 @@
 
   <section class="review" aria-labelledby="reviewTitle">
     <h2 id="reviewTitle">Gostou da visita? Conte no Google.</h2>
-    <p>Sua avaliação ajuda outras pessoas a conhecerem a Di Lione. É opcional e não muda o seu prêmio.</p>
-    <a class="btn btn-outline btn-block" href="https://share.google/PHMQO1NeFKuHtEQFT" target="_blank" rel="noopener">Avaliar no Google</a>
+    <p id="reviewText">Sua avaliação ajuda outras pessoas a conhecerem a Di Lione. É opcional e não muda o seu prêmio.</p>
+    <a class="btn btn-outline btn-block js-google-review" href="https://share.google/PHMQO1NeFKuHtEQFT" target="_blank" rel="noopener">Avaliar no Google</a>
   </section>
 
   <footer class="site-footer">
@@ -677,6 +684,10 @@
     <div class="ticket-actions">
       <button class="btn btn-outline" id="copyCodeBtn" type="button">Copiar código</button>
       <button class="btn" id="closeTicketBtn" type="button">Fechar</button>
+    </div>
+    <div class="ticket-review">
+      <p id="ticketReviewText">Gostou? Se quiser, conte também no Google. É opcional.</p>
+      <a class="btn btn-outline btn-block js-google-review" href="https://share.google/PHMQO1NeFKuHtEQFT" target="_blank" rel="noopener">Avaliar no Google</a>
     </div>
   </div>
 </div>
@@ -823,7 +834,7 @@
   var userPic = $("userPic"), userName = $("userName"), userEmail = $("userEmail"), logoutBtn = $("logoutBtn");
   var stepSurvey = $("stepSurvey"), surveyMark = $("surveyMark"), surveySub = $("surveySub"), surveyBody = $("surveyBody");
   var surveyForm = $("surveyForm"), surveyQuestions = $("surveyQuestions"), surveyComment = $("surveyComment");
-  var surveyError = $("surveyError"), surveySubmit = $("surveySubmit"), surveyDoneBox = $("surveyDone"), goSpinBtn = $("goSpinBtn");
+  var surveyError = $("surveyError"), surveySubmit = $("surveySubmit"), surveyDoneBox = $("surveyDone");
 
   var currentRotation = 0;
   var spinning = false;
@@ -847,13 +858,10 @@
 
   // ===== Pesquisa =====
   var QUESTIONS = [
-    { id:"atendimento", label:"Como foi o atendimento?", type:"stars" },
-    { id:"comida",      label:"E a comida?", type:"stars" },
-    { id:"espera",      label:"O tempo de espera foi bom?", type:"stars" },
-    { id:"ambiente",    label:"Ambiente e limpeza", type:"stars" },
-    { id:"recomenda",   label:"Você indicaria a Di Lione para alguém?", type:"choice", options:["Sim","Talvez","Não"] }
+    { id:"nota", label:"Dê uma nota de 1 a 5", type:"stars" }
   ];
   var answers = {};
+  var lastComment = "";
 
   function renderQuestions(){
     QUESTIONS.forEach(function(q){
@@ -946,8 +954,7 @@
     surveyMark.textContent = surveyDone ? "✓" : "2";
     surveyBody.hidden = !user;
     surveySub.textContent = !user ? "Libera depois do login."
-      : (surveyDone ? "Concluída." : "Cinco perguntas rápidas.");
-    goSpinBtn.hidden = hasSpun;
+      : (surveyDone ? "Nota enviada." : "Uma nota e pronto.");
 
     // roleta
     var canSpin = !!user && surveyDone && !hasSpun && !spinning;
@@ -959,9 +966,9 @@
     } else if (canSpin){
       wheelStatus.textContent = "Tudo pronto. Toque em Girar no centro da pizza.";
     } else if (user){
-      wheelStatus.textContent = "Responda a pesquisa abaixo para liberar o giro.";
+      wheelStatus.textContent = "Dê sua nota abaixo para liberar o giro.";
     } else {
-      wheelStatus.textContent = "Entre com o Google e responda a pesquisa para girar.";
+      wheelStatus.textContent = "Entre com o Google e dê sua nota para girar.";
     }
   }
 
@@ -1052,9 +1059,7 @@
       fs.classList.toggle("missing", answers[fs.dataset.q] === undefined);
     });
     if (missing.length){
-      surveyError.textContent = missing.length === 1
-        ? "Falta responder: " + missing[0].label
-        : "Faltam " + missing.length + " perguntas. Elas estão marcadas em vermelho.";
+      surveyError.textContent = "Toque nas estrelas para dar sua nota.";
       surveyError.hidden = false;
       return;
     }
@@ -1064,30 +1069,53 @@
     var payload = {};
     QUESTIONS.forEach(function(q){ payload[q.id] = answers[q.id]; });
     payload.comentario = surveyComment.value.trim().slice(0, 500);
+    lastComment = payload.comentario;
 
     api("survey", payload).then(function(res){
       if (res && (res.ok || res.error === "duplicate")){
         markSurveyDone();
-        if (res.error === "duplicate") showToast("Esta conta já tinha respondido a pesquisa.");
+        if (res.error === "duplicate") showToast("Esta conta já tinha dado nota.");
         refresh();
-        spinBtn.classList.add("ready");
+        goSpin();
       } else {
         throw new Error(res && res.error);
       }
     }).catch(function(err){
       surveyError.textContent = (err && err.message === "auth")
         ? "Sua sessão do Google expirou. Toque em Sair e entre de novo."
-        : "As respostas não foram enviadas. Verifique sua internet e toque em Enviar respostas de novo.";
+        : "A nota não foi enviada. Verifique sua internet e toque no botão de novo.";
       surveyError.hidden = false;
       surveySubmit.disabled = false;
-      surveySubmit.textContent = "Enviar respostas";
+      surveySubmit.textContent = "Enviar e girar a pizza";
     });
   });
 
-  goSpinBtn.addEventListener("click", function(){
+  function goSpin(){
+    if (hasSpun) return;
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     document.querySelector(".wheel-area").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block:"center" });
-    window.setTimeout(doSpin, reduce ? 0 : 500);
+    window.setTimeout(doSpin, reduce ? 0 : 600);
+  }
+
+  // ===== Avaliação no Google (opcional, nunca condiciona o prêmio) =====
+  function updateReviewCopy(){
+    var has = !!lastComment;
+    document.querySelectorAll(".js-google-review").forEach(function(a){
+      a.textContent = has ? "Copiar comentário e abrir o Google" : "Avaliar no Google";
+    });
+    $("ticketReviewText").textContent = has
+      ? "Gostou? Copiamos seu comentário: no Google é só colar e enviar. É opcional."
+      : "Gostou? Se quiser, conte também no Google. É opcional.";
+  }
+  document.querySelectorAll(".js-google-review").forEach(function(a){
+    a.addEventListener("click", function(){
+      // o link abre normalmente; a cópia acontece no mesmo toque
+      if (lastComment && navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(lastComment).then(function(){
+          showToast("Comentário copiado. No Google, toque e segure para colar.");
+        }).catch(function(){});
+      }
+    });
   });
 
   // ===== Giro =====
@@ -1105,6 +1133,7 @@
     ticketPrize.textContent = PRIZES[prizeCode] || "—";
     ticketCode.textContent = code;
     ticketValid.textContent = v.valid ? formatBR(v.expiresAt) : "—";
+    updateReviewCopy();
     ticketOverlay.hidden = false;
     closeTicketBtn.focus();
   }

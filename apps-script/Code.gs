@@ -15,12 +15,8 @@
 
 const CLIENT_ID = '7212727243-n2uqn1dds2cq02vql1fdtn290er0s1bj.apps.googleusercontent.com';
 const SHEET_NAME = 'Pesquisas';
-const HEADERS = [
-  'Data', 'E-mail', 'Nome',
-  'Atendimento', 'Comida', 'Espera', 'Ambiente', 'Recomenda', 'Comentário',
-  'Prêmio', 'Código', 'Data do giro'
-];
-const COL = { email: 2, prize: 10, code: 11, spinAt: 12 };
+const HEADERS = ['Data', 'E-mail', 'Nome', 'Nota', 'Comentário', 'Prêmio', 'Código', 'Data do giro'];
+const COL = { email: 2, prize: 6, code: 7, spinAt: 8 };
 const PRIZES = ['SOB', 'BEB', 'D10', 'FAT'];
 
 function doPost(e) {
@@ -56,8 +52,7 @@ function doPost(e) {
       const d = body.data || {};
       sheet.appendRow([
         new Date(), email, user.name || '',
-        stars(d.atendimento), stars(d.comida), stars(d.espera), stars(d.ambiente),
-        ['Sim', 'Talvez', 'Não'].indexOf(d.recomenda) >= 0 ? d.recomenda : '',
+        stars(d.nota),
         String(d.comentario || '').slice(0, 500),
         '', '', ''
       ]);
