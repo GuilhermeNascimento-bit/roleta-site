@@ -540,14 +540,14 @@
   .ticket-help{ font-size:15px; color:var(--ink-soft); }
   .ticket-actions{ display:flex; gap:10px; }
   .ticket-actions .btn{ flex:1; }
-  .ticket-review{
+  .ticket-gate{
     display:flex;
     flex-direction:column;
     gap:10px;
-    padding-top:16px;
-    border-top:2px dashed var(--line-paper);
   }
-  .ticket-review p{ font-size:15px; color:var(--ink-soft); }
+  .ticket-gate[hidden]{ display:none; }
+  .ticket-gate p{ font-size:15.5px; color:var(--ink); font-weight:600; }
+  .ticket-code.locked{ color:var(--ink-faint); letter-spacing:.12em; }
 
   .toast{
     position:fixed;
@@ -650,7 +650,7 @@
 
   <section class="review" aria-labelledby="reviewTitle">
     <h2 id="reviewTitle">Gostou da visita? Conte no Google.</h2>
-    <p id="reviewText">Sua avaliação ajuda outras pessoas a conhecerem a Di Lione. É opcional e não muda o seu prêmio.</p>
+    <p id="reviewText">Sua avaliação ajuda outras pessoas a conhecerem a Di Lione.</p>
     <a class="btn btn-outline btn-block js-google-review" href="https://share.google/PHMQO1NeFKuHtEQFT" target="_blank" rel="noopener">Avaliar no Google</a>
   </section>
 
@@ -674,20 +674,20 @@
   <div class="ticket" role="dialog" aria-modal="true" aria-labelledby="ticketHeading">
     <h2 id="ticketHeading">Você ganhou</h2>
     <p class="ticket-prize" id="ticketPrize">—</p>
+    <div class="ticket-gate" id="ticketGate">
+      <p id="ticketReviewText">Para liberar seu código, avalie a Di Lione no Google.</p>
+      <a class="btn btn-block js-google-review" href="https://share.google/PHMQO1NeFKuHtEQFT" target="_blank" rel="noopener">Avaliar no Google</a>
+    </div>
     <dl>
       <dt>Código</dt>
       <dd class="ticket-code" id="ticketCode">—</dd>
       <dt>Válido até</dt>
       <dd id="ticketValid">—</dd>
     </dl>
-    <p class="ticket-help">Mostre este código no balcão para usar a cortesia no seu próximo pedido.</p>
+    <p class="ticket-help" id="ticketHelp">Mostre este código no balcão para usar a cortesia no seu próximo pedido.</p>
     <div class="ticket-actions">
       <button class="btn btn-outline" id="copyCodeBtn" type="button">Copiar código</button>
       <button class="btn" id="closeTicketBtn" type="button">Fechar</button>
-    </div>
-    <div class="ticket-review">
-      <p id="ticketReviewText">Gostou? Se quiser, conte também no Google. É opcional.</p>
-      <a class="btn btn-outline btn-block js-google-review" href="https://share.google/PHMQO1NeFKuHtEQFT" target="_blank" rel="noopener">Avaliar no Google</a>
     </div>
   </div>
 </div>
@@ -1097,25 +1097,65 @@
     window.setTimeout(doSpin, reduce ? 0 : 600);
   }
 
-  // ===== Avaliação no Google (opcional, nunca condiciona o prêmio) =====
+  // ===== Avaliação no Google: libera o código do cupom =====
+  // Não há como confirmar a avaliação; o código é liberado quando a pessoa abre o Google.
+  var unlockedMem = {};
+  var pendingUnlock = false;
+  function isUnlocked(code){
+    if (!code) return false;
+    if (unlockedMem[code]) return true;
+    try { return window.localStorage.getItem("dilione_cupom_liberado_" + code) === "1"; } catch (e) { return false; }
+  }
+  function setUnlocked(code){
+    if (!code) return;
+    unlockedMem[code] = true;
+    try { window.localStorage.setItem("dilione_cupom_liberado_" + code, "1"); } catch (e) {}
+  }
   function updateReviewCopy(){
     var has = !!lastComment;
     document.querySelectorAll(".js-google-review").forEach(function(a){
-      a.textContent = has ? "Copiar comentário e abrir o Google" : "Avaliar no Google";
+      a.textContent = has ? "Copiar comentário e avaliar no Google" : "Avaliar no Google";
     });
     $("ticketReviewText").textContent = has
-      ? "Gostou? Copiamos seu comentário: no Google é só colar e enviar. É opcional."
-      : "Gostou? Se quiser, conte também no Google. É opcional.";
+      ? "Para liberar seu código, avalie a Di Lione no Google. Copiamos seu comentário: lá é só colar e enviar."
+      : "Para liberar seu código, avalie a Di Lione no Google.";
+  }
+  function renderTicket(){
+    if (!lastCode) return;
+    var open = isUnlocked(lastCode) && !pendingUnlock;
+    $("ticketGate").hidden = open;
+    ticketCode.textContent = open ? lastCode : "••••-••••-••••";
+    ticketCode.classList.toggle("locked", !open);
+    copyCodeBtn.disabled = !open;
+    $("ticketHelp").textContent = open
+      ? "Mostre este código no balcão para usar a cortesia no seu próximo pedido."
+      : "Seu código aparece aqui quando você voltar do Google.";
+    updateReviewCopy();
+  }
+  function finishUnlock(){
+    if (!pendingUnlock) return;
+    pendingUnlock = false;
+    renderTicket();
+    if (lastCode && isUnlocked(lastCode)){
+      ticketOverlay.hidden = false;
+      showToast("Obrigado! Seu código foi liberado.");
+    }
   }
   document.querySelectorAll(".js-google-review").forEach(function(a){
     a.addEventListener("click", function(){
       // o link abre normalmente; a cópia acontece no mesmo toque
       if (lastComment && navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(lastComment).then(function(){
-          showToast("Comentário copiado. No Google, toque e segure para colar.");
-        }).catch(function(){});
+        navigator.clipboard.writeText(lastComment).catch(function(){});
+      }
+      if (lastCode && !isUnlocked(lastCode)){
+        setUnlocked(lastCode);
+        pendingUnlock = true;
+        window.setTimeout(finishUnlock, 4000); // caso a volta não seja detectada
       }
     });
+  });
+  document.addEventListener("visibilitychange", function(){
+    if (document.visibilityState === "visible") window.setTimeout(finishUnlock, 600);
   });
 
   // ===== Giro =====
@@ -1131,9 +1171,9 @@
   function openTicket(prizeCode, code){
     var v = verifyCode(code);
     ticketPrize.textContent = PRIZES[prizeCode] || "—";
-    ticketCode.textContent = code;
     ticketValid.textContent = v.valid ? formatBR(v.expiresAt) : "—";
-    updateReviewCopy();
+    lastPrize = prizeCode; lastCode = code;
+    renderTicket();
     ticketOverlay.hidden = false;
     closeTicketBtn.focus();
   }
@@ -1192,7 +1232,8 @@
 
   // ===== Cupom =====
   copyCodeBtn.addEventListener("click", function(){
-    var text = ticketCode.textContent;
+    if (!lastCode || !isUnlocked(lastCode)) return;
+    var text = lastCode;
     if (navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(text).then(function(){ showToast("Código copiado"); })
         .catch(function(){ showToast("Não deu para copiar. Selecione o código e copie manualmente."); });
