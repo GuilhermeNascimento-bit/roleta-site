@@ -566,6 +566,72 @@
   }
   .toast[hidden]{ display:none; }
 
+  /* ===== Responsivo ===== */
+  .ticket-overlay .ticket{ border-radius:0; }
+
+  /* tablet */
+  @media (min-width:640px){
+    .page{ max-width:600px; padding:32px 32px 56px; }
+    .hero{ padding-top:36px; }
+    .hero p{ font-size:18px; }
+    .wheel-shell{ width:min(70vw, 400px); }
+    .slice-label{ font-size:14px; }
+    .ticket-overlay{ align-items:center; padding:24px; }
+    .ticket{
+      border-radius:var(--radius-m);
+      padding:32px 28px 28px;
+      animation-name:popIn;
+    }
+    .ticket::before{ display:none; }
+  }
+  @keyframes popIn{
+    from{ transform:translateY(16px) scale(.97); opacity:0; }
+    to{ transform:none; opacity:1; }
+  }
+
+  /* computador: duas colunas, pizza fixa à esquerda */
+  @media (min-width:960px){
+    .page{ max-width:1160px; padding:36px 48px 64px; }
+    .layout{
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) minmax(380px, 440px);
+      gap:72px;
+      align-items:start;
+    }
+    .stage{
+      position:sticky;
+      top:24px;
+      display:grid;
+      grid-template-columns:minmax(0, 1fr);
+    }
+    .hero{ padding:28px 0 0; }
+    .hero h1{ font-size:clamp(56px, 5.6vw, 80px); max-width:12ch; }
+    .hero p{ font-size:19px; max-width:36ch; }
+    .wheel-area{ align-items:flex-start; padding-top:28px; }
+    .wheel-shell{ width:clamp(280px, min(34vw, calc(100vh - 420px)), 440px); }
+    .wheel-status, .prize-key{ text-align:left; justify-content:flex-start; }
+    .wheel-status{ max-width:40ch; }
+    .flow{ padding-top:28px; }
+    .steps{ margin-top:0; }
+    .step{ padding:22px; }
+  }
+
+  /* telas baixas no computador: título menor para a pizza caber */
+  @media (min-width:960px) and (max-height:760px){
+    .hero{ padding-top:0; }
+    .hero h1{ font-size:clamp(48px, 4.6vw, 64px); }
+    .wheel-area{ padding-top:16px; }
+    .wheel-shell{ width:clamp(260px, min(30vw, calc(100vh - 360px)), 380px); }
+  }
+
+  /* telas muito estreitas */
+  @media (max-width:359px){
+    .page{ padding-left:12px; padding-right:12px; }
+    .stars{ gap:4px; }
+    .star{ font-size:20px; }
+    .ticket-actions{ flex-direction:column; }
+  }
+
   @media (prefers-reduced-motion: reduce){
     .wheel-svg{ transition-duration:.6s; }
     .ticket{ animation:none; }
@@ -579,6 +645,8 @@
 
   <div class="brand">Di Lione</div>
 
+  <div class="layout">
+  <div class="stage">
   <header class="hero">
     <h1>Sua opinião vale uma fatia.</h1>
     <p>Entre com o Google, conte como foi sua visita e gire a pizza. Todo giro dá uma cortesia para o seu próximo pedido.</p>
@@ -598,7 +666,9 @@
       <li><span class="swatch" style="background:var(--pz-cheese)"></span>Fatia de pizza</li>
     </ul>
   </section>
+  </div>
 
+  <div class="flow">
   <ol class="steps">
     <li class="step" id="stepLogin" data-state="active">
       <div class="step-head">
@@ -667,6 +737,8 @@
       <p class="staff-hint">Confira o prazo e resgate uma única vez por cliente. Os cupons também ficam registrados na planilha.</p>
     </div>
   </footer>
+  </div>
+  </div>
 
 </div>
 
