@@ -13,7 +13,7 @@
  *  - Uma pesquisa e um giro por conta Google.
  */
 
-const CLIENT_ID = 'COLE_AQUI_SEU_CLIENT_ID.apps.googleusercontent.com';
+const CLIENT_ID = '7212727243-n2uqn1dds2cq02vql1fdtn290er0s1bj.apps.googleusercontent.com';
 const SHEET_NAME = 'Pesquisas';
 const HEADERS = [
   'Data', 'E-mail', 'Nome',
